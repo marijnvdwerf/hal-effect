@@ -96,6 +96,7 @@ types:
             "opcode::set_vel": vector_args # 0x90-0x97
             "opcode::add_vel": vector_args # 0x98-0x9F
             "opcode::set_size_lerp": size_lerp_args
+            "opcode::set_size_rand": size_rand_args
             "opcode::set_flags": set_flags_args
             "opcode::set_gravity": set_gravity_args
             "opcode::set_friction": set_friction_args
@@ -213,7 +214,7 @@ types:
 
   size_lerp_args:
     doc: Arguments for size interpolation
-    -webide-representation: "{lerp_lenth} {target_size:dec}"
+    -webide-representation: "len:{lerp_length} target:{target_size:dec}"
     seq:
       - id: lerp_length
         type: var_length
@@ -221,6 +222,17 @@ types:
       - id: target_size
         type: f4
         doc: Target size value (32-bit float)
+
+  size_rand_args:
+    -webide-representation: "len:{lerp_length} {base_size:dec} {scale:dec}"
+    seq:
+      - id: lerp_length
+        type: var_length
+        doc: Duration of size interpolation
+      - id: base_size
+        type: f4
+      - id: scale
+        type: f4
 
   set_flags_args:
     -webide-representation: "{flags}"
@@ -335,7 +347,7 @@ types:
       - Bit 1: Green component
       - Bit 2: Blue component
       - Bit 3: Alpha component
-    -webide-representation: "r:{red:dec} r:{green:dec} r:{blue:dec} a:{alpha:dec} len:{lerp_length}"
+    -webide-representation: "r:{red:dec} g:{green:dec} b:{blue:dec} a:{alpha:dec} len:{lerp_length}"
     instances:
       has_red:
         value: (_parent.opcode_raw & 0x01) != 0
@@ -448,6 +460,8 @@ enums:
     0xab:
       id: mul_vel
       doc: Scale velocity uniformly
+    0xac:
+      id: set_size_rand
     # Flag operations
     0xad:
       id: set_flag_80
