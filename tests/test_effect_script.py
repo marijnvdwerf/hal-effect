@@ -1,17 +1,14 @@
 from __future__ import annotations
 
-import struct
 from dataclasses import dataclass
 from typing import Any, Dict
 
 import pytest
 
 from hal_effect.types import (
-    OpCode, Instruction,
-    WaitInstruction, VectorInstruction, ColorBlendInstruction,
-    SimpleInstruction, SizeLerpInstruction, SetFlagsInstruction,
-    VelMulInstruction, VelAngleInstruction, SetLoopInstruction,
-    UnkInstruction, TryDeadRandInstruction, LifeRandInstruction,
+    OpCode, WaitInstruction, VectorInstruction, ColorBlendInstruction,
+    SizeLerpInstruction, SetFlagsInstruction,
+    VelMulInstruction, VelAngleInstruction, UnkInstruction, TryDeadRandInstruction, LifeRandInstruction,
     ScriptInstruction, SetSizeRandInstruction
 )
 from hal_effect.parser import EffectScriptParser
