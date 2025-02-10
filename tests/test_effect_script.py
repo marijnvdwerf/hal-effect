@@ -5,22 +5,22 @@ from typing import Any, Dict
 
 import pytest
 
-from hal_effect.types import (
-    OpCode,
-    WaitInstruction,
-    VectorInstruction,
-    ColorBlendInstruction,
-    SizeLerpInstruction,
-    SetFlagsInstruction,
-    VelMulInstruction,
-    VelAngleInstruction,
-    UnkInstruction,
-    TryDeadRandInstruction,
-    LifeRandInstruction,
-    ScriptInstruction,
-    SetSizeRandInstruction,
-)
 from hal_effect.parser import EffectScriptParser
+from hal_effect.types import (
+    ColorBlendInstruction,
+    LifeRandInstruction,
+    OpCode,
+    ScriptInstruction,
+    SetFlagsInstruction,
+    SetSizeRandInstruction,
+    SizeLerpInstruction,
+    TryDeadRandInstruction,
+    UnkInstruction,
+    VectorInstruction,
+    VelAngleInstruction,
+    VelMulInstruction,
+    WaitInstruction,
+)
 
 
 @dataclass
