@@ -148,7 +148,8 @@ class SimpleInstruction:
 
 @dataclass
 class SetSizeRandInstruction:
-    base_size: float
+    lerp_length: int
+    base: float
     random_range: float
 
 @dataclass

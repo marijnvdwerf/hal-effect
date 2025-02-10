@@ -8,7 +8,7 @@ from .types import (
     WaitInstruction, VectorInstruction, SizeLerpInstruction, ColorBlendInstruction,
     ScriptInstruction, LifeRandInstruction, TryDeadRandInstruction, VelRandInstruction,
     VelAngleInstruction, VelMulInstruction, VelAxisMulInstruction, UnkInstruction,
-    SetFlagsInstruction, SetLoopInstruction, SimpleInstruction
+    SetFlagsInstruction, SetLoopInstruction, SimpleInstruction, SetSizeRandInstruction
 )
 
 
@@ -194,6 +194,12 @@ class EffectScriptParser:
         elif op == OpCode.SET_LOOP:
             count = reader.read_u8()
             return Instruction(op, SetLoopInstruction(count))
+
+        elif op == OpCode.SET_SIZE_RAND:
+            length = reader.read_var_length_u16()
+            base = reader.read_float()
+            range_val = reader.read_float()
+            return Instruction(op, SetSizeRandInstruction(length, base, range_val))
 
         # Simple instructions with no parameters
         elif op in [OpCode.LOOP, OpCode.SET_RETURN, OpCode.RETURN, OpCode.DEAD, OpCode.END]:
