@@ -4,38 +4,55 @@ import struct
 from typing import Optional
 
 from .types import (
-    Vec3f, OpCode, Instruction, EffectScript, EffectScriptPtr, ParticleScriptDesc,
-    WaitInstruction, VectorInstruction, SizeLerpInstruction, ColorBlendInstruction,
-    ScriptInstruction, LifeRandInstruction, TryDeadRandInstruction, VelRandInstruction,
-    VelAngleInstruction, VelMulInstruction, VelAxisMulInstruction, UnkInstruction,
-    SetFlagsInstruction, SetLoopInstruction, SimpleInstruction, SetSizeRandInstruction
+    Vec3f,
+    OpCode,
+    Instruction,
+    EffectScript,
+    EffectScriptPtr,
+    ParticleScriptDesc,
+    WaitInstruction,
+    VectorInstruction,
+    SizeLerpInstruction,
+    ColorBlendInstruction,
+    ScriptInstruction,
+    LifeRandInstruction,
+    TryDeadRandInstruction,
+    VelRandInstruction,
+    VelAngleInstruction,
+    VelMulInstruction,
+    VelAxisMulInstruction,
+    UnkInstruction,
+    SetFlagsInstruction,
+    SetLoopInstruction,
+    SimpleInstruction,
+    SetSizeRandInstruction,
 )
 
 
 class BinaryReader:
     """Helper class for reading binary data with a position cursor."""
-    
+
     def __init__(self, data: bytes):
         self.data = data
         self.offset = 0
-    
+
     def read_float(self) -> float:
-        value = struct.unpack('>f', self.data[self.offset:self.offset+4])[0]
+        value = struct.unpack(">f", self.data[self.offset : self.offset + 4])[0]
         self.offset += 4
         return value
 
     def read_u16(self) -> int:
-        value = struct.unpack('>H', self.data[self.offset:self.offset+2])[0]
+        value = struct.unpack(">H", self.data[self.offset : self.offset + 2])[0]
         self.offset += 2
         return value
 
     def read_u32(self) -> int:
-        value = struct.unpack('>I', self.data[self.offset:self.offset+4])[0]
+        value = struct.unpack(">I", self.data[self.offset : self.offset + 4])[0]
         self.offset += 4
         return value
 
     def read_s32(self) -> int:
-        value = struct.unpack('>i', self.data[self.offset:self.offset+4])[0]
+        value = struct.unpack(">i", self.data[self.offset : self.offset + 4])[0]
         self.offset += 4
         return value
 
@@ -53,16 +70,16 @@ class BinaryReader:
     def read_var_length_u16(self) -> int:
         if self.offset >= len(self.data):
             return 0
-            
+
         first_byte = self.read_u8()
-        
+
         if first_byte & 0x80:
             if self.offset >= len(self.data):
                 return 0
             value = ((first_byte & 0x7F) << 8) + self.read_u8()
         else:
             value = first_byte
-            
+
         return value + 1
 
     def skip(self, count: int):
@@ -80,10 +97,10 @@ class BinaryReader:
 
 class EffectScriptParser:
     """Parser for effect script binary format."""
-    
+
     def __init__(self):
         self.reader = None
-    
+
     def parse(self, data: bytes) -> ParticleScriptDesc:
         """Parse a particle script description from binary data."""
         self.reader = BinaryReader(data)
@@ -91,17 +108,17 @@ class EffectScriptParser:
 
     def _parse_instruction(self, data: Optional[bytes] = None) -> Optional[Instruction]:
         """Parse a single instruction from the current position or from provided bytes data.
-        
+
         Args:
             data: Optional bytes to parse. If provided, creates a new reader for just this instruction.
         """
         reader = BinaryReader(data) if data is not None else self.reader
-            
+
         if not reader.can_read(1):
             return None
-        
+
         opcode = reader.read_u8()
-        
+
         # Wait command (0x00-0x7F)
         if opcode < 0x80:
             frames = opcode & 0x1F
@@ -114,7 +131,12 @@ class EffectScriptParser:
             return Instruction(OpCode.END, WaitInstruction(frames, data_id))
 
         # Vector operations
-        if opcode & 0xF8 in [OpCode.SET_POS, OpCode.ADD_POS, OpCode.SET_VEL, OpCode.ADD_VEL]:
+        if opcode & 0xF8 in [
+            OpCode.SET_POS,
+            OpCode.ADD_POS,
+            OpCode.SET_VEL,
+            OpCode.ADD_VEL,
+        ]:
             args = VectorInstruction()
             if opcode & 1:
                 args.x = reader.read_float()
@@ -202,7 +224,13 @@ class EffectScriptParser:
             return Instruction(op, SetSizeRandInstruction(length, base, range_val))
 
         # Simple instructions with no parameters
-        elif op in [OpCode.LOOP, OpCode.SET_RETURN, OpCode.RETURN, OpCode.DEAD, OpCode.END]:
+        elif op in [
+            OpCode.LOOP,
+            OpCode.SET_RETURN,
+            OpCode.RETURN,
+            OpCode.DEAD,
+            OpCode.END,
+        ]:
             return Instruction(op, SimpleInstruction())
 
         return None
@@ -216,26 +244,26 @@ class EffectScriptParser:
         gravity = self.reader.read_float()
         friction = self.reader.read_float()
         velocity = self.reader.read_vec3f()
-        
+
         # Skip unknown fields
         self.reader.skip(12)  # 3 unknown float fields
-        
+
         size = self.reader.read_float()
-        
+
         # Parse bytecode until next effect or end of file
         bytecode = []
         while True:
             if next_ptr is not None and self.reader.offset >= next_ptr:
                 break
-                
+
             instr = self._parse_instruction()
             if instr is None:
                 break
-                
+
             bytecode.append(instr)
             if instr.opcode == OpCode.END:
                 break
-        
+
         return EffectScript(
             kind=kind,
             texture_id=texture_id,
@@ -246,31 +274,31 @@ class EffectScriptParser:
             friction=friction,
             velocity=velocity,
             size=size,
-            bytecode=bytecode
+            bytecode=bytecode,
         )
 
     def _parse_particle_script_desc(self) -> ParticleScriptDesc:
         count = self.reader.read_s32()
         scripts = []
-        
+
         # First read all pointers
         for _ in range(count):
             ptr_value = self.reader.read_u32()
             scripts.append(EffectScriptPtr(ptr_value=ptr_value, target=None))
-        
+
         # Now parse each script at its pointer location
         for i, script in enumerate(scripts):
             if script.ptr_value != 0:
                 # Get the next pointer location if there is one
                 next_ptr = None
-                for next_script in scripts[i+1:]:
+                for next_script in scripts[i + 1 :]:
                     if next_script.ptr_value != 0:
                         next_ptr = next_script.ptr_value
                         break
-                
+
                 old_offset = self.reader.offset
                 self.reader.seek(script.ptr_value)
                 script.target = self._parse_effect_script(next_ptr)
                 self.reader.seek(old_offset)
-        
-        return ParticleScriptDesc(count=count, scripts=scripts) 
+
+        return ParticleScriptDesc(count=count, scripts=scripts)
