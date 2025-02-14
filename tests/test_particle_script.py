@@ -20,12 +20,11 @@ def test_parse_particle_script():
         # Script pointers
         " 00 00 00 0C"  # First script at offset 0x0C
         " 00 00 00 40"  # Second script at offset 0x40
-        
         # First script at 0x0C
-        " 00 00"        # kind=0
-        " 00 00"        # texture_id=0
-        " 00 14"        # effect_lifetime=20
-        " 00 1E"        # particle_lifetime=30
+        " 00 00"  # kind=0
+        " 00 00"  # texture_id=0
+        " 00 14"  # effect_lifetime=20
+        " 00 1E"  # particle_lifetime=30
         " 00 00 00 02"  # flags=2 (4 bytes)
         " 3F 80 00 00"  # gravity=1.0
         " 3F 7A E1 48"  # friction=0.98
@@ -36,14 +35,13 @@ def test_parse_particle_script():
         " 40 49 0F DA"  # unk24=3.14159
         " 40 40 00 00"  # unk28=3.0
         " 40 A0 00 00"  # size=5.0
-        " FF"           # END instruction
-        " 01 02 03"     # Padding
-        
+        " FF"  # END instruction
+        " 01 02 03"  # Padding
         # Second script at 0x40
-        " 00 00"        # kind=0
-        " 00 01"        # texture_id=1
-        " 00 50"        # effect_lifetime=80
-        " 00 64"        # particle_lifetime=100
+        " 00 00"  # kind=0
+        " 00 01"  # texture_id=1
+        " 00 50"  # effect_lifetime=80
+        " 00 64"  # particle_lifetime=100
         " 00 00 00 03"  # flags=3 (4 bytes)
         " 3C F5 C2 8F"  # gravity=0.03
         " 3F 7A E1 48"  # friction=0.98
@@ -54,22 +52,22 @@ def test_parse_particle_script():
         " 3F 06 0A 92"  # unk24=0.523599
         " 3F 00 00 00"  # unk28=0.5
         " 41 A0 00 00"  # size=20.0
-        " FF"           # END instruction
+        " FF"  # END instruction
         " FE FD FC FB"  # Padding
-        " FA F9 F8"     # More padding
+        " FA F9 F8"  # More padding
         " 00 00 00 00"  # Padding
         " 00 00 00 00"  # Padding
     )
-    
+
     parser = EffectScriptParser()
     result = parser.parse(hex_to_bytes(data))
-    
+
     # Check overall structure
     assert result.count == 2
     assert len(result.scripts) == 2
     assert result.scripts[0].ptr_value == 0x0C
     assert result.scripts[1].ptr_value == 0x40
-    
+
     # Check first script
     script1 = result.scripts[0].target
     assert script1 is not None
@@ -86,7 +84,7 @@ def test_parse_particle_script():
     assert script1.size == pytest.approx(5.0)
     assert len(script1.bytecode) == 1
     assert script1.bytecode[0].opcode == OpCode.END
-    
+
     # Check second script
     script2 = result.scripts[1].target
     assert script2 is not None
@@ -101,7 +99,7 @@ def test_parse_particle_script():
     assert script2.velocity.y == pytest.approx(0.01)
     assert script2.velocity.z == pytest.approx(2.0)
     assert script2.size == pytest.approx(20.0)
-    
+
     # Check second script bytecode - only END instruction, rest is padding
     assert len(script2.bytecode) == 1
-    assert script2.bytecode[0].opcode == OpCode.END 
+    assert script2.bytecode[0].opcode == OpCode.END
