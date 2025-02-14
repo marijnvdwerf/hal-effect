@@ -148,8 +148,8 @@ class EffectScriptParser:
 
         # Color blend operations
         if opcode & 0xF0 in [OpCode.SET_PRIM_BLEND, OpCode.SET_ENV_BLEND]:
-            length = reader.read_var_length_u16()
-            args = ColorBlendInstruction(length)
+            steps = reader.read_var_length_u16()
+            args = ColorBlendInstruction(steps)
             if opcode & 1:
                 args.red = reader.read_u8()
             if opcode & 2:
@@ -171,9 +171,9 @@ class EffectScriptParser:
             return Instruction(op, ScriptInstruction(script_id))
 
         elif op == OpCode.SET_SIZE_LERP:
-            length = reader.read_var_length_u16()
+            steps = reader.read_var_length_u16()
             size = reader.read_float()
-            return Instruction(op, SizeLerpInstruction(length, size))
+            return Instruction(op, SizeLerpInstruction(steps, size))
 
         elif op == OpCode.SET_LIFE_RAND:
             base = reader.read_u16()
@@ -218,10 +218,10 @@ class EffectScriptParser:
             return Instruction(op, SetLoopInstruction(count))
 
         elif op == OpCode.SET_SIZE_RAND:
-            length = reader.read_var_length_u16()
+            steps = reader.read_var_length_u16()
             base = reader.read_float()
             range_val = reader.read_float()
-            return Instruction(op, SetSizeRandInstruction(length, base, range_val))
+            return Instruction(op, SetSizeRandInstruction(steps, base, range_val))
 
         # Simple instructions with no parameters
         elif op in [

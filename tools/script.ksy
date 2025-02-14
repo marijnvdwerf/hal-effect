@@ -214,9 +214,9 @@ types:
 
   size_lerp_args:
     doc: Arguments for size interpolation
-    -webide-representation: "len:{lerp_length} target:{target_size:dec}"
+    -webide-representation: "steps:{steps} target:{target_size:dec}"
     seq:
-      - id: lerp_length
+      - id: steps
         type: var_length
         doc: Duration of size interpolation
       - id: target_size
@@ -224,9 +224,9 @@ types:
         doc: Target size value (32-bit float)
 
   size_rand_args:
-    -webide-representation: "len:{lerp_length} {base_size:dec} {scale:dec}"
+    -webide-representation: "steps:{steps} {base_size:dec} {scale:dec}"
     seq:
-      - id: lerp_length
+      - id: steps
         type: var_length
         doc: Duration of size interpolation
       - id: base_size
@@ -347,7 +347,7 @@ types:
       - Bit 1: Green component
       - Bit 2: Blue component
       - Bit 3: Alpha component
-    -webide-representation: "r:{red:dec} g:{green:dec} b:{blue:dec} a:{alpha:dec} len:{lerp_length}"
+    -webide-representation: "r:{red:dec} g:{green:dec} b:{blue:dec} a:{alpha:dec} steps:{steps}"
     instances:
       has_red:
         value: (_parent.opcode_raw & 0x01) != 0
@@ -362,7 +362,7 @@ types:
         value: (_parent.opcode_raw & 0x08) != 0
         doc: True if alpha component is present
     seq:
-      - id: lerp_length
+      - id: steps
         type: var_length
         doc: Color interpolation duration
       - id: red

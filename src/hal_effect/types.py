@@ -86,13 +86,13 @@ class VectorInstruction:
 
 @dataclass
 class SizeLerpInstruction:
-    lerp_length: int
+    steps: int
     target_size: float
 
 
 @dataclass
 class ColorBlendInstruction:
-    lerp_length: int
+    steps: int
     red: Optional[int] = None
     green: Optional[int] = None
     blue: Optional[int] = None
@@ -164,7 +164,7 @@ class SimpleInstruction:
 
 @dataclass
 class SetSizeRandInstruction:
-    lerp_length: int
+    steps: int
     base: float
     random_range: float
 

@@ -44,7 +44,7 @@ TEST_CASES = [
         opcode=OpCode.SET_PRIM_BLEND,
         args={
             "type": ColorBlendInstruction,
-            "lerp_length": 61,
+            "steps": 61,
             "red": 255,
             "green": 255,
             "blue": 255,
@@ -57,7 +57,7 @@ TEST_CASES = [
         opcode=OpCode.SET_ENV_BLEND,
         args={
             "type": ColorBlendInstruction,
-            "lerp_length": 2,
+            "steps": 2,
             "red": 128,
             "green": 255,
             "blue": 255,
@@ -68,7 +68,7 @@ TEST_CASES = [
         name="SET_SIZE_LERP",
         bytes_str="A0 14 43 7A 00 00",
         opcode=OpCode.SET_SIZE_LERP,
-        args={"type": SizeLerpInstruction, "lerp_length": 21, "target_size": 250.0},
+        args={"type": SizeLerpInstruction, "steps": 21, "target_size": 250.0},
     ),
     InstructionTestCase(
         name="SET_FLAGS",
@@ -94,7 +94,7 @@ TEST_CASES = [
         opcode=OpCode.SET_SIZE_RAND,
         args={
             "type": SetSizeRandInstruction,
-            "lerp_length": 1,
+            "steps": 1,
             "base": 5.0,
             "random_range": 30.0,
         },
@@ -105,7 +105,7 @@ TEST_CASES = [
         opcode=OpCode.SET_PRIM_BLEND,
         args={
             "type": ColorBlendInstruction,
-            "lerp_length": 101,
+            "steps": 101,
             "red": None,
             "green": None,
             "blue": None,
@@ -142,7 +142,7 @@ TEST_CASES = [
         opcode=OpCode.SET_ENV_BLEND,
         args={
             "type": ColorBlendInstruction,
-            "lerp_length": 1,
+            "steps": 1,
             "red": 0,
             "green": 255,
             "blue": 21,
