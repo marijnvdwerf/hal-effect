@@ -186,10 +186,8 @@ def test_parse_instructions(case: InstructionTestCase):
     for key, value in case.args.items():
         if key != "type":
             if isinstance(value, float):
-                # Floating point values need to be compared with a small tolerance
-                assert abs(getattr(instr.args, key) - value) < 1e-6, (
-                    f"Argument {key} mismatch"
-                )
+                # Floating point values need to be compared with pytest.approx
+                assert getattr(instr.args, key) == pytest.approx(value), f"Argument {key} mismatch"
             else:
                 assert getattr(instr.args, key) == value, f"Argument {key} mismatch"
 
