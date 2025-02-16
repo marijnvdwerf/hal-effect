@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import struct
-from typing import Optional, List
+from typing import List, Optional
 
 from .types import (
     ColorBlendInstruction,
@@ -102,7 +102,7 @@ class EffectScriptParser:
     def parse(self, data: bytes) -> List[EffectScript]:
         """Parse a list of effect scripts from binary data."""
         self.reader = BinaryReader(data)
-        
+
         count = self.reader.read_s32()
         ptrs = []
         effects = []
@@ -121,7 +121,7 @@ class EffectScriptParser:
             # TODO: Save padding bytes
             padding = (4 - (self.reader.offset % 4)) % 4
             self.reader.skip(padding)
-            
+
             effects.append(effect)
 
         return effects
