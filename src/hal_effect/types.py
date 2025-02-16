@@ -13,6 +13,9 @@ class Vec3f:
 
 
 class OpCode(IntEnum):
+    # Wait operation
+    WAIT = 0x00  # Wait for N frames
+
     # Vector operations
     SET_POS = 0x80  # Set particle position
     ADD_POS = 0x88  # Add to particle position
@@ -204,15 +207,3 @@ class EffectScript:
     velocity: Vec3f
     size: float
     bytecode: List[Instruction]
-
-
-@dataclass
-class EffectScriptPtr:
-    ptr_value: int
-    target: Optional[EffectScript]
-
-
-@dataclass
-class ParticleScriptDesc:
-    count: int
-    scripts: List[EffectScriptPtr]
