@@ -156,29 +156,29 @@ types:
   wait_args:
     doc: |
       Arguments for wait command (0x00-0x7F):
-      - Bit 6 (E): Extra byte flag - adds (Extra << 5) to frame count
-      - Bit 5 (X): Extra data flag - includes a data ID byte
       - Bits 0-4 (N): Base frame count
+      - Bit 5 (E): Extra byte flag - shifts base frame count by 8 and combines with extra byte
+      - Bits 6-7: If 01, includes a data ID byte
 
-      Total frames = N + (Extra << 5) if E=1
+      Total frames = N if E=0, otherwise (N << 8) | Extra
     -webide-representation: "len:{frames:dec} idx:{data_id:dec}"
     instances:
       has_extra:
-        value: (_parent.opcode_raw & 0x40) != 0
+        value: (_parent.opcode_raw & 0x20) != 0
         doc: True if command includes extra frames byte
       has_data:
-        value: (_parent.opcode_raw & 0x20) != 0
+        value: (_parent.opcode_raw & 0xC0) == 0x40
         doc: True if command includes data ID byte
       base_frames:
         value: _parent.opcode_raw & 0x1F
         doc: Base number of frames to wait (bits 0-4)
       frames:
-        value: base_frames + extra_frames << 5
+        value: "has_extra ? (base_frames << 8) | extra_frames : base_frames"
     seq:
       - id: extra_frames
         type: u1
         if: has_extra
-        doc: Additional frames, shifted left by 5 bits
+        doc: Additional frames byte, combined with shifted base frames
       - id: data_id
         type: u1
         if: has_data
