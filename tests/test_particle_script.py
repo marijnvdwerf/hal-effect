@@ -63,14 +63,10 @@ def test_parse_particle_script():
     result = parser.parse(hex_to_bytes(data))
 
     # Check overall structure
-    assert result.count == 2
-    assert len(result.scripts) == 2
-    assert result.scripts[0].ptr_value == 0x0C
-    assert result.scripts[1].ptr_value == 0x40
+    assert len(result) == 2
 
     # Check first script
-    script1 = result.scripts[0].target
-    assert script1 is not None
+    script1 = result[0]
     assert script1.kind == 0
     assert script1.texture_id == 0
     assert script1.effect_lifetime == 20
@@ -86,8 +82,7 @@ def test_parse_particle_script():
     assert script1.bytecode[0].opcode == OpCode.END
 
     # Check second script
-    script2 = result.scripts[1].target
-    assert script2 is not None
+    script2 = result[1]
     assert script2.kind == 0
     assert script2.texture_id == 1
     assert script2.effect_lifetime == 80

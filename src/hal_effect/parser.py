@@ -1,16 +1,14 @@
 from __future__ import annotations
 
 import struct
-from typing import Optional
+from typing import Optional, List
 
 from .types import (
     ColorBlendInstruction,
     EffectScript,
-    EffectScriptPtr,
     Instruction,
     LifeRandInstruction,
     OpCode,
-    ParticleScriptDesc,
     ScriptInstruction,
     SetFlagsInstruction,
     SetLoopInstruction,
@@ -101,10 +99,32 @@ class EffectScriptParser:
     def __init__(self):
         self.reader = None
 
-    def parse(self, data: bytes) -> ParticleScriptDesc:
-        """Parse a particle script description from binary data."""
+    def parse(self, data: bytes) -> List[EffectScript]:
+        """Parse a list of effect scripts from binary data."""
         self.reader = BinaryReader(data)
-        return self._parse_particle_script_desc()
+        
+        count = self.reader.read_s32()
+        ptrs = []
+        effects = []
+
+        # First read all pointers
+        for _ in range(count):
+            ptr = self.reader.read_u32()
+            if ptr != 0:
+                ptrs.append(ptr)
+
+        # Now parse each script at its pointer location
+        for i, ptr in enumerate(ptrs):
+            assert self.reader.offset == ptr
+            effect = self._parse_effect_script()
+
+            # TODO: Save padding bytes
+            padding = (4 - (self.reader.offset % 4)) % 4
+            self.reader.skip(padding)
+            
+            effects.append(effect)
+
+        return effects
 
     def _parse_instruction(self, data: Optional[bytes] = None) -> Optional[Instruction]:
         """Parse a single instruction from the current position or from provided bytes data.
@@ -126,9 +146,9 @@ class EffectScriptParser:
                 extra = reader.read_u8()
                 frames = (frames << 8) | extra
             data_id = None
-            if opcode & 0x40:
+            if (opcode & 0xC0) == 0x40:
                 data_id = reader.read_u8()
-            return Instruction(OpCode.END, WaitInstruction(frames, data_id))
+            return Instruction(OpCode.WAIT, WaitInstruction(frames, data_id))
 
         # Vector operations
         if opcode & 0xF8 in [
@@ -235,7 +255,7 @@ class EffectScriptParser:
 
         return None
 
-    def _parse_effect_script(self, next_ptr: Optional[int] = None) -> EffectScript:
+    def _parse_effect_script(self) -> EffectScript:
         kind = self.reader.read_u16()
         texture_id = self.reader.read_u16()
         effect_lifetime = self.reader.read_u16()
@@ -253,13 +273,7 @@ class EffectScriptParser:
         # Parse bytecode until next effect or end of file
         bytecode = []
         while True:
-            if next_ptr is not None and self.reader.offset >= next_ptr:
-                break
-
             instr = self._parse_instruction()
-            if instr is None:
-                break
-
             bytecode.append(instr)
             if instr.opcode == OpCode.END:
                 break
@@ -276,29 +290,3 @@ class EffectScriptParser:
             size=size,
             bytecode=bytecode,
         )
-
-    def _parse_particle_script_desc(self) -> ParticleScriptDesc:
-        count = self.reader.read_s32()
-        scripts = []
-
-        # First read all pointers
-        for _ in range(count):
-            ptr_value = self.reader.read_u32()
-            scripts.append(EffectScriptPtr(ptr_value=ptr_value, target=None))
-
-        # Now parse each script at its pointer location
-        for i, script in enumerate(scripts):
-            if script.ptr_value != 0:
-                # Get the next pointer location if there is one
-                next_ptr = None
-                for next_script in scripts[i + 1 :]:
-                    if next_script.ptr_value != 0:
-                        next_ptr = next_script.ptr_value
-                        break
-
-                old_offset = self.reader.offset
-                self.reader.seek(script.ptr_value)
-                script.target = self._parse_effect_script(next_ptr)
-                self.reader.seek(old_offset)
-
-        return ParticleScriptDesc(count=count, scripts=scripts)
